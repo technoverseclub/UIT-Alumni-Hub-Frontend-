@@ -1,0 +1,62 @@
+.hero {
+    height: 100vh;
+    background: linear-gradient(180deg, #0A1A2F 51%, #153E75 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+.login-btn {
+    position: absolute;
+    top: 12px;
+    right: 20px;
+
+    width: 120px;
+    height: 40px;
+
+    background-color: #ffffff;
+    border: 0.5px solid #000000;
+    border-radius: 20px;
+
+    font-family: "Inter", sans-serif;
+    font-size: 20px;
+    font-weight: 400;
+    color: #000000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+    padding: 0;
+}
+
+.hero-content {
+    text-align: center;
+    color: white;
+}
+.hero-content h1 {
+    font-size: 100px;
+    margin-bottom: 0px;
+    font-family: "Playfair Display";
+    font-weight: bold;
+    line-height: 1;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.hero-content p {
+    font-size: 25px;
+    line-height: 1.2;
+    font-family: "Inter",sans-serif;
+    font-weight: bold;
+}
+
+.hero-logo {
+    position: absolute;
+    top: 16px;
+    left: 20px;
+    height: 40px;
+    width: auto;
+}
+
