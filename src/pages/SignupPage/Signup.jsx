@@ -1,7 +1,7 @@
 import React from 'react';
 import Logo from './logo'
 import Bg from './Bg';
-import SingupForm from './SingupForm';
+import SingupForm from './SignupForm';
 
 const Signup = () => {
   return (
