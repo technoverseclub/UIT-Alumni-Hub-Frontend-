@@ -39,65 +39,65 @@ const LoginForm = () => {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!validate()) return;
+    e.preventDefault();
+    if (!validate()) return;
 
-  setLoading(true);
-  setErrors({});
+    setLoading(true);
+    setErrors({});
 
-  try {
-    const res = await fetch("http://localhost:5000/api/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    });
-
-    let data = {};
     try {
-      data = await res.json();
-    } catch {
-      throw new Error("Invalid server response");
-    }
+      const res = await fetch("http://uit-alumni-hub-backend.onrender.com/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
-    // ❌ Login failed
-    if (!res.ok) {
+      let data = {};
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error("Invalid server response");
+      }
+
+      // ❌ Login failed
+      if (!res.ok) {
+        setErrors({
+          api: data?.message || "Invalid email or password",
+        });
+        return;
+      }
+
+      // 🔐 OTP required
+      if (data?.step === "OTP_REQUIRED") {
+        navigate("/otp", {
+          state: { email: formData.email },
+        });
+        return;
+      }
+
+      // ✅ Direct login success
+      if (data?.token) {
+        localStorage.setItem("token", data.token);
+        navigate("/dashboard");
+        return;
+      }
+
+      // ⚠️ Unexpected success response
       setErrors({
-        api: data?.message || "Invalid email or password",
+        api: "Unexpected server response. Please try again.",
       });
-      return;
-    }
 
-    // 🔐 OTP required
-    if (data?.step === "OTP_REQUIRED") {
-      navigate("/otp", {
-        state: { email: formData.email },
+    } catch (error) {
+      console.error("Login error:", error);
+      setErrors({
+        api: "Server error. Please try again later.",
       });
-      return;
+    } finally {
+      setLoading(false);
     }
-
-    // ✅ Direct login success
-    if (data?.token) {
-      localStorage.setItem("token", data.token);
-      navigate("/dashboard");
-      return;
-    }
-
-    // ⚠️ Unexpected success response
-    setErrors({
-      api: "Unexpected server response. Please try again.",
-    });
-
-  } catch (error) {
-    console.error("Login error:", error);
-    setErrors({
-      api: "Server error. Please try again later.",
-    });
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 pt-5">
@@ -111,6 +111,7 @@ const LoginForm = () => {
             <input
               type="email"
               name="email"
+              autoComplete="email"
               value={formData.email}
               onChange={handleChange}
               placeholder="Enter your email"
@@ -127,6 +128,7 @@ const LoginForm = () => {
             <input
               type="password"
               name="password"
+              autoComplete="current-password"
               value={formData.password}
               onChange={handleChange}
               placeholder="Enter your password"
@@ -166,11 +168,10 @@ const LoginForm = () => {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-2.5 rounded-full font-semibold cursor-pointer text-white transition ${
-              loading
+            className={`w-full py-2.5 rounded-full font-semibold cursor-pointer text-white transition ${loading
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-blue-900 hover:bg-blue-950"
-            }`}
+              }`}
           >
             {loading ? "Sending OTP..." : "Send OTP"}
           </button>

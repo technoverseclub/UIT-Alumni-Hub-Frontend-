@@ -1,22 +1,17 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
 
 const SignupForm = () => {
   const navigate = useNavigate();
 
   /* ================= STATE ================= */
   const [formData, setFormData] = useState({
-    fullName: "",
+    name: "",
     email: "",
     role: "",
   });
 
   const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
-
-  /* ================= API CONFIG ================= */
-  const API_URL = "http://localhost:5000/api/auth/signup"; // change later
 
   /* ================= HANDLERS ================= */
   const handleChange = (e) => {
@@ -27,11 +22,9 @@ const SignupForm = () => {
       [name]: value,
     }));
 
-    // clear field error on change
     setErrors((prev) => ({
       ...prev,
       [name]: "",
-      api: "",
     }));
   };
 
@@ -39,8 +32,8 @@ const SignupForm = () => {
   const validate = () => {
     const newErrors = {};
 
-    if (!formData.fullName.trim()) {
-      newErrors.fullName = "Full name is required";
+    if (!formData.name.trim()) {
+      newErrors.name = "Full name is required";
     }
 
     if (!formData.email) {
@@ -58,37 +51,19 @@ const SignupForm = () => {
   };
 
   /* ================= SUBMIT ================= */
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (!validate()) return;
 
-    setLoading(true);
-
-    try {
-      const response = await axios.post(API_URL, formData, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.data?.success) {
-        navigate("/otp", {
-          state: {
-            email: formData.email,
-            role: formData.role,
-            type: "signup",
-          },
-        });
-      }
-    } catch (error) {
-      setErrors({
-        api:
-          error.response?.data?.message ||
-          "Server error. Please try again.",
-      });
-    } finally {
-      setLoading(false);
-    }
+    // 🔐 Save step-1 data (refresh safe)
+    sessionStorage.setItem(
+      "signupStep1",
+      JSON.stringify({
+        ...formData,
+        email: formData.email.trim(),
+      })
+    );
+    navigate("/signup2");
   };
 
   /* ================= UI ================= */
@@ -101,8 +76,6 @@ const SignupForm = () => {
 
         <form onSubmit={handleSubmit} noValidate>
 
-         
-
           {/* Full Name */}
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">
@@ -110,15 +83,15 @@ const SignupForm = () => {
             </label>
             <input
               type="text"
-              name="fullName"
-              value={formData.fullName}
+              name="name"
+              value={formData.name}
               onChange={handleChange}
               placeholder="Enter your full name"
               className="w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-600"
             />
-            {errors.fullName && (
+            {errors.name && (
               <p className="text-red-500 text-xs font-bold mt-1">
-                {errors.fullName}
+                {errors.name}
               </p>
             )}
           </div>
@@ -155,7 +128,7 @@ const SignupForm = () => {
               className="w-full px-3 py-2 rounded-lg border bg-white focus:ring-2 focus:ring-blue-600"
             >
               <option value="" disabled>
-                Select your role (Student / Alumni)
+                Select your role
               </option>
               <option value="student">Student</option>
               <option value="alumni">Alumni</option>
@@ -167,27 +140,13 @@ const SignupForm = () => {
             )}
           </div>
 
-          {/* API Error */}
-          {errors.api && (
-            <p className="text-red-600 text-sm text-center mb-3 font-semibold">
-              {errors.api}
-            </p>
-          )}
-
-          {/* Submit */}
           <button
             type="submit"
-            disabled={loading}
-            className={`w-full py-2.5 rounded-full font-semibold cursor-pointer text-white transition ${
-              loading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-900 hover:bg-blue-950"
-            }`}
+            className="w-full py-2.5 rounded-full font-semibold text-white bg-blue-900 hover:bg-blue-950 transition"
           >
-            {loading ? "Sending OTP..." : "Send OTP"}
+            Next
           </button>
 
-          {/* Login */}
           <p className="mt-4 text-center text-sm font-medium">
             Already have an account?
             <Link
@@ -197,6 +156,7 @@ const SignupForm = () => {
               Login
             </Link>
           </p>
+
         </form>
       </div>
     </div>
