@@ -15,36 +15,43 @@ const OtpVerify = () => {
   const inputsRef = useRef([]);
   const navigate = useNavigate();
 
-  const role = localStorage.getItem("role");
-  const authType = localStorage.getItem("authType");
-  const email = localStorage.getItem("email");
+  /* ✅ READ FROM sessionStorage */
+  const email = sessionStorage.getItem("email");
+  const role = sessionStorage.getItem("role");
+  const authType = sessionStorage.getItem("authType");
 
-  /* ⏱️ RESTARTABLE TIMER */
-useEffect(() => {
-  // Stop timer if we hit 0 or if the OTP is already successful
-  if (time <= 0 || success) return;
+  console.log("OTP CONTEXT:", { email, role, authType });
 
-  // Set up the interval to tick every 1 second
-  const interval = setInterval(() => {
-    setTime((prev) => prev - 1);
-  }, 1000);
+  /* 🚨 SAFETY GUARD */
+  useEffect(() => {
+    if (!email || !role || !authType) {
+      navigate("/signup");
+    }
+  }, [email, role, authType, navigate]);
 
-  // Clean up the interval on every re-render or when component unmounts
-  return () => clearInterval(interval);
-}, [time, success]); // <--- Added 'time' as a dependency
+  /* ⏱️ TIMER */
+  useEffect(() => {
+    if (time <= 0 || success) return;
 
+    const interval = setInterval(() => {
+      setTime((prev) => prev - 1);
+    }, 1000);
 
+    return () => clearInterval(interval);
+  }, [time, success]);
 
-  /* 🚀 AUTO REDIRECT AFTER SUCCESS */
+  /* 🚀 REDIRECT AFTER SUCCESS */
   useEffect(() => {
     if (!success) return;
 
     const redirectTimer = setTimeout(() => {
       if (role === "student") navigate("/studentdashboard");
-      if (role === "alumni" && authType === "signup")
-        navigate("/alumniform");
+      if (role === "alumni" && authType === "signup") navigate("/alumniform");
       if (role === "alumni" && authType === "login")
         navigate("/alumnidashboard");
+
+      /* ✅ CLEANUP */
+      sessionStorage.clear();
     }, 1500);
 
     return () => clearTimeout(redirectTimer);
@@ -101,22 +108,24 @@ useEffect(() => {
     });
   };
 
-  /* ✅ VERIFY OTP */
+  /* ✅ VERIFY OTP (FIXED PAYLOAD) */
   const handleVerify = async () => {
     if (otp.some((d) => d === "") || loading) return;
 
     setLoading(true);
     try {
-      const res = await axios.post("/api/auth/verify-otp", {
-        email,
-        otp: otp.join(""),
-        role,
-        authType,
-      });
+      const res = await axios.post(
+        "https://uit-alumni-hub-backend.onrender.com/auth/signup/verify",
+        {
+          email,
+          otp: otp.join(""),
+        }
+      );
 
       localStorage.setItem("token", res.data.token);
       setSuccess(true);
-    } catch {
+    } catch (err) {
+      console.error("OTP VERIFY ERROR:", err?.response?.data || err);
       setError(true);
       setOtp(Array(OTP_LENGTH).fill(""));
       inputsRef.current[0]?.focus();
@@ -125,39 +134,41 @@ useEffect(() => {
     }
   };
 
-  /* 🔁 RESEND OTP */
- const handleResend = async () => {
-  if (resending || time > 0) return;
+  /* 🔁 RESEND OTP (HTTPS FIX) */
+  const handleResend = async () => {
+    if (resending || time > 0) return;
 
-  setResending(true);
-  try {
-    await axios.post("/api/auth/resend-otp", { email });
+    setResending(true);
+    try {
+      await axios.post(
+        "https://uit-alumni-hub-backend.onrender.com/auth/resend-otp",
+        { email }
+      );
 
-    setOtp(Array(OTP_LENGTH).fill(""));
-    setError(false);
-    setSuccess(false);
-    
-    // This state change will now trigger the useEffect above
-    setTime(59); 
-
-    inputsRef.current[0]?.focus();
-  } catch (error) {
-    console.error("Resend OTP failed", error);
-  } finally {
-    setResending(false);
-  }
-};
-
+      setOtp(Array(OTP_LENGTH).fill(""));
+      setError(false);
+      setSuccess(false);
+      setTime(59);
+      inputsRef.current[0]?.focus();
+    } catch (err) {
+      console.error("Resend OTP failed", err);
+    } finally {
+      setResending(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-3">
       <div className="w-full max-w-[380px] bg-white rounded-3xl shadow-lg p-6">
-
         <h2 className="text-center font-semibold mb-6">
           Enter 6-digit code sent to your email
         </h2>
 
-        <div className={`grid grid-cols-6 gap-3 mb-4 place-items-center ${error ? "animate-shake" : ""}`}>
+        <div
+          className={`grid grid-cols-6 gap-3 mb-4 place-items-center ${
+            error ? "animate-shake" : ""
+          }`}
+        >
           {otp.map((digit, index) => (
             <input
               key={index}
@@ -172,7 +183,13 @@ useEffect(() => {
               onKeyDown={(e) => handleKeyDown(e, index)}
               onPaste={handlePaste}
               className={`aspect-square w-[42px] text-center text-xl font-semibold border-2 rounded-xl
-                ${success ? "border-green-500 bg-green-50" : error ? "border-red-500" : "border-blue-700"}`}
+                ${
+                  success
+                    ? "border-green-500 bg-green-50"
+                    : error
+                    ? "border-red-500"
+                    : "border-blue-700"
+                }`}
             />
           ))}
         </div>
@@ -187,7 +204,7 @@ useEffect(() => {
           <button
             onClick={handleVerify}
             disabled={loading || otp.some((d) => d === "")}
-            className="w-full bg-blue-950 hover:bg-blue-950 cursor-pointer text-white py-3 rounded-full font-semibold"
+            className="w-full bg-blue-950 text-white py-3 rounded-full font-semibold"
           >
             {loading ? "Verifying..." : "Verify"}
           </button>
@@ -201,18 +218,16 @@ useEffect(() => {
         </p>
 
         <button
-  disabled={time > 0 || resending}
-  onClick={handleResend}
-  className={`block mx-auto mt-3 text-blue-700 font-semibold ${
-    time > 0 || resending
-      ? "opacity-50 cursor-not-allowed"
-      : "hover:underline"
-  }`}
->
-  {resending ? "Sending..." : "Resend OTP"}
-</button>
-
-
+          disabled={time > 0 || resending}
+          onClick={handleResend}
+          className={`block mx-auto mt-3 text-blue-700 font-semibold ${
+            time > 0 || resending
+              ? "opacity-50 cursor-not-allowed"
+              : "hover:underline"
+          }`}
+        >
+          {resending ? "Sending..." : "Resend OTP"}
+        </button>
       </div>
     </div>
   );
