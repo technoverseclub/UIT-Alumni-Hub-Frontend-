@@ -1,6 +1,6 @@
 import React from 'react';
-import Logo from './logo'
-import Bg from './Bg';
+import Logo from "../../components/Logo";
+import Bg from "../../components/Bg";
 import SingupForm from './SignupForm';
 
 const Signup = () => {

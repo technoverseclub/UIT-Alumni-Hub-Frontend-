@@ -1,6 +1,6 @@
 import React from 'react'
-import Logo from './Logo'
-import Bg from './Bg'
+import Logo from "../../components/Logo";
+import Bg from "../../components/Bg";
 import LoginForm from './LoginForm'
 
 const Login = () => {

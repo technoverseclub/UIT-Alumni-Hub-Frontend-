@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import Bg from "./Bg";
-import Logo from "../LoginPage/Logo";
+import Bg from "../../components/Bg";
+import Logo from "../../components/Logo";
 import LoginButton from "./LoginButton";
 
 const AlumniHub = () => {
