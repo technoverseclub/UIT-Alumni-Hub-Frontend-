@@ -1,5 +1,5 @@
 import React from 'react'
-import Logo from './Logo'
+import Logo from './logo'
 import Bg from './Bg'
 import AlumniFormDetails from './AlumniFormDetails'
 

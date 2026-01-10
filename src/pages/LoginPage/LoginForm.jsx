@@ -13,31 +13,35 @@ const LoginForm = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
+  /* ================= INPUT HANDLER ================= */
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: "" }));
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    setErrors((prev) => ({
+      ...prev,
+      [name]: "",
+      api: "",
+    }));
   };
 
+  /* ================= VALIDATION ================= */
   const validate = () => {
     const newErrors = {};
 
-    if (!formData.email) {
-      newErrors.email = "Email is required";
-    }
-
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    }
-
-    if (!formData.role) {
-      newErrors.role = "Please select a role";
-    }
+    if (!formData.email.trim()) newErrors.email = "Email is required";
+    if (!formData.password) newErrors.password = "Password is required";
+    if (!formData.role) newErrors.role = "Please select a role";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  /* ================= SUBMIT ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
@@ -46,13 +50,18 @@ const LoginForm = () => {
     setErrors({});
 
     try {
-      const res = await fetch("http://uit-alumni-hub-backend.onrender.com/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const res = await fetch(
+        "https://uit-alumni-hub-backend.onrender.com/auth/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: formData.email.trim(),
+            password: formData.password,
+            role: formData.role,
+          }),
+        }
+      );
 
       let data = {};
       try {
@@ -61,7 +70,7 @@ const LoginForm = () => {
         throw new Error("Invalid server response");
       }
 
-      // ❌ Login failed
+      /* ❌ LOGIN FAILED (NO OTP SENT) */
       if (!res.ok) {
         setErrors({
           api: data?.message || "Invalid email or password",
@@ -69,26 +78,32 @@ const LoginForm = () => {
         return;
       }
 
-      // 🔐 OTP required
+      /* 🔐 PASSWORD VERIFIED → OTP SENT BY BACKEND */
       if (data?.step === "OTP_REQUIRED") {
-        navigate("/otp", {
-          state: { email: formData.email },
-        });
+        sessionStorage.setItem("email", formData.email.trim());
+        sessionStorage.setItem("role", formData.role);
+        sessionStorage.setItem("authType", "login");
+
+        navigate("/otp");
         return;
       }
 
-      // ✅ Direct login success
+      /* ✅ DIRECT LOGIN (IF OTP SKIPPED) */
       if (data?.token) {
         localStorage.setItem("token", data.token);
-        navigate("/dashboard");
+
+        navigate(
+          formData.role === "student"
+            ? "/studentdashboard"
+            : "/alumnidashboard"
+        );
         return;
       }
 
-      // ⚠️ Unexpected success response
+      /* ⚠️ UNEXPECTED */
       setErrors({
         api: "Unexpected server response. Please try again.",
       });
-
     } catch (error) {
       console.error("Login error:", error);
       setErrors({
@@ -99,6 +114,7 @@ const LoginForm = () => {
     }
   };
 
+  /* ================= UI (UNCHANGED) ================= */
   return (
     <div className="min-h-screen flex items-center justify-center px-4 pt-5">
       <div className="w-full max-w-[360px] bg-white rounded-2xl p-6 shadow-xl">
@@ -135,7 +151,9 @@ const LoginForm = () => {
               className="w-full px-4 py-2 border rounded-lg"
             />
             {errors.password && (
-              <p className="text-red-500 text-xs font-bold">{errors.password}</p>
+              <p className="text-red-500 text-xs font-bold">
+                {errors.password}
+              </p>
             )}
           </div>
 
@@ -148,7 +166,9 @@ const LoginForm = () => {
               onChange={handleChange}
               className="w-full px-4 py-2 border rounded-lg"
             >
-              <option value="" disabled>Select your role (Student / Alumni)</option>
+              <option value="" disabled>
+                Select your role (Student / Alumni)
+              </option>
               <option value="student">Student</option>
               <option value="alumni">Alumni</option>
             </select>
@@ -157,7 +177,7 @@ const LoginForm = () => {
             )}
           </div>
 
-          {/* 🔴 API ERROR MESSAGE HERE */}
+          {/* API ERROR */}
           {errors.api && (
             <p className="text-red-600 text-sm text-center mb-3 font-semibold">
               {errors.api}
@@ -168,17 +188,21 @@ const LoginForm = () => {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-2.5 rounded-full font-semibold cursor-pointer text-white transition ${loading
+            className={`w-full py-2.5 rounded-full font-semibold cursor-pointer text-white transition ${
+              loading
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-blue-900 hover:bg-blue-950"
-              }`}
+            }`}
           >
             {loading ? "Sending OTP..." : "Send OTP"}
           </button>
 
           <p className="text-center mt-4 text-sm font-medium">
             Don&apos;t have an account?
-            <Link to="/signup" className="text-blue-600 font-bold ml-1 hover:underline">
+            <Link
+              to="/signup"
+              className="text-blue-600 font-bold ml-1 hover:underline"
+            >
               SignUp
             </Link>
           </p>
@@ -189,7 +213,3 @@ const LoginForm = () => {
 };
 
 export default LoginForm;
-
-
-
-
