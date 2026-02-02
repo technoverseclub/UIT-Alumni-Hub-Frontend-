@@ -15,17 +15,16 @@ const OtpVerify = () => {
   const inputsRef = useRef([]);
   const navigate = useNavigate();
 
-  /* ✅ READ FROM sessionStorage */
-  const email = sessionStorage.getItem("email");
-  const role = sessionStorage.getItem("role");
-  const authType = sessionStorage.getItem("authType");
-
-  console.log("OTP CONTEXT:", { email, role, authType });
+  /* ✅ READ FROM localStorage (FIXED) */
+  const email = localStorage.getItem("email");
+  const role = localStorage.getItem("role");
+  const name = localStorage.getItem("name");
+  const authType = localStorage.getItem("authType"); // signup | login
 
   /* 🚨 SAFETY GUARD */
   useEffect(() => {
     if (!email || !role || !authType) {
-      navigate("/signup");
+      navigate("/login");
     }
   }, [email, role, authType, navigate]);
 
@@ -45,19 +44,23 @@ const OtpVerify = () => {
     if (!success) return;
 
     const redirectTimer = setTimeout(() => {
-      if (role === "student") navigate("/studentdashboard");
-      if (role === "alumni" && authType === "signup") navigate("/alumniform");
-      if (role === "alumni" && authType === "login")
-        navigate("/alumnidashboard");
+      if (authType === "signup") {
+        navigate("/login");
+      } else {
+        navigate(
+          role === "STUDENT"
+            ? "/student/dashboard"
+            : "/alumni/dashboard"
+        );
+      }
 
-      /* ✅ CLEANUP */
-      sessionStorage.clear();
+      localStorage.clear();
     }, 1500);
 
     return () => clearTimeout(redirectTimer);
   }, [success, role, authType, navigate]);
 
-  /* INPUT HANDLERS */
+  /* ================= INPUT HANDLERS ================= */
   const handleChange = (e, index) => {
     if (success) return;
 
@@ -108,21 +111,36 @@ const OtpVerify = () => {
     });
   };
 
-  /* ✅ VERIFY OTP (FIXED PAYLOAD) */
+  /* ================= VERIFY OTP ================= */
   const handleVerify = async () => {
     if (otp.some((d) => d === "") || loading) return;
 
     setLoading(true);
     try {
-      const res = await axios.post(
-        "https://uit-alumni-hub-backend.onrender.com/auth/signup/verify",
-        {
-          email,
-          otp: otp.join(""),
-        }
-      );
+      const payload =
+        authType === "signup"
+          ? {
+              email,
+              otp: otp.join(""),
+              name,
+              role,
+            }
+          : {
+              email,
+              otp: otp.join(""),
+            };
 
-      localStorage.setItem("token", res.data.token);
+      const url =
+        authType === "signup"
+          ? "https://uit-alumni-hub-backend.onrender.com/auth/signup/verify"
+          : "https://uit-alumni-hub-backend.onrender.com/auth/login/verify";
+
+      const res = await axios.post(url, payload);
+
+      if (res.data?.token) {
+        localStorage.setItem("token", res.data.token);
+      }
+
       setSuccess(true);
     } catch (err) {
       console.error("OTP VERIFY ERROR:", err?.response?.data || err);
@@ -134,7 +152,7 @@ const OtpVerify = () => {
     }
   };
 
-  /* 🔁 RESEND OTP (HTTPS FIX) */
+  /* ================= RESEND OTP ================= */
   const handleResend = async () => {
     if (resending || time > 0) return;
 
@@ -157,6 +175,7 @@ const OtpVerify = () => {
     }
   };
 
+  /* ================= UI ================= */
   return (
     <div className="min-h-screen flex items-center justify-center px-3">
       <div className="w-full max-w-[380px] bg-white rounded-3xl shadow-lg p-6">
@@ -177,7 +196,6 @@ const OtpVerify = () => {
               maxLength={1}
               value={digit}
               inputMode="numeric"
-              autoComplete="one-time-code"
               disabled={success}
               onChange={(e) => handleChange(e, index)}
               onKeyDown={(e) => handleKeyDown(e, index)}

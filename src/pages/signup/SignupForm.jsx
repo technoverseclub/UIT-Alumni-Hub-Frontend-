@@ -12,6 +12,7 @@ const SignupForm = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
   /* ================= HANDLERS ================= */
   const handleChange = (e) => {
@@ -25,6 +26,7 @@ const SignupForm = () => {
     setErrors((prev) => ({
       ...prev,
       [name]: "",
+      api: "",
     }));
   };
 
@@ -51,19 +53,52 @@ const SignupForm = () => {
   };
 
   /* ================= SUBMIT ================= */
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
 
-    // 🔐 Save step-1 data (refresh safe)
-    sessionStorage.setItem(
-      "signupStep1",
-      JSON.stringify({
-        ...formData,
-        email: formData.email.trim(),
-      })
-    );
-    navigate("/signup2");
+    setLoading(true);
+    setErrors({});
+
+    try {
+      const res = await fetch(
+        "https://uit-alumni-hub-backend.onrender.com/auth/signup/request-otp",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: formData.email.trim(),
+            role: formData.role.toUpperCase(), // STUDENT / ALUMNI
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setErrors({
+          api: data?.message || "Failed to send OTP",
+        });
+        return;
+      }
+
+      /* ✅ OTP SENT */
+      if (data?.message === "OTP sent") {
+        localStorage.setItem("email", formData.email.trim());
+        localStorage.setItem("name", formData.name.trim());
+        localStorage.setItem("role", formData.role.toUpperCase());
+        localStorage.setItem("authType", "signup");
+
+        navigate("/otp");
+      }
+    } catch (error) {
+      console.error("Signup error:", error);
+      setErrors({
+        api: "Server error. Please try again later.",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   /* ================= UI ================= */
@@ -140,11 +175,23 @@ const SignupForm = () => {
             )}
           </div>
 
+          {/* API ERROR */}
+          {errors.api && (
+            <p className="text-red-600 text-sm text-center mb-3 font-semibold">
+              {errors.api}
+            </p>
+          )}
+
           <button
             type="submit"
-            className="w-full py-2.5 rounded-full font-semibold text-white bg-blue-900 hover:bg-blue-950 transition"
+            disabled={loading}
+            className={`w-full py-2.5 rounded-full font-semibold text-white transition ${
+              loading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-900 hover:bg-blue-950"
+            }`}
           >
-            Next
+            {loading ? "Sending OTP..." : "Send OTP"}
           </button>
 
           <p className="mt-4 text-center text-sm font-medium">

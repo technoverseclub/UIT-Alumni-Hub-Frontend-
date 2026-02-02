@@ -20,9 +20,9 @@ const AppRouter = () => {
         <Route path="/signup" element={<Signup />} />
         <Route path="/signup2" element={<Signup2 />} />
         <Route path="/otp" element={<Otp />} />
-        <Route path="/studentdashboard" element={<StudentDashboard />} />
-        <Route path="/alumnidashboard" element={<AlumniDashboard />} />
-        <Route path="/alumniform" element={<AlumniForm />} />
+        <Route path="/student/dashboard" element={<StudentDashboard />} />
+        <Route path="/alumni/dashboard" element={<AlumniDashboard />} />
+        <Route path="/alumni/form" element={<AlumniForm />} />
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
     </BrowserRouter>
