@@ -15,20 +15,19 @@ const OtpVerify = () => {
   const inputsRef = useRef([]);
   const navigate = useNavigate();
 
-  /* ✅ READ FROM localStorage (FIXED) */
+  /* ================= READ REQUIRED DATA ================= */
   const email = localStorage.getItem("email");
-  const role = localStorage.getItem("role");
-  const name = localStorage.getItem("name");
   const authType = localStorage.getItem("authType"); // signup | login
+  const name = localStorage.getItem("name"); // signup only
 
-  /* 🚨 SAFETY GUARD */
+  /* ================= SAFETY GUARD ================= */
   useEffect(() => {
-    if (!email || !role || !authType) {
+    if (!email || !authType) {
       navigate("/login");
     }
-  }, [email, role, authType, navigate]);
+  }, [email, authType, navigate]);
 
-  /* ⏱️ TIMER */
+  /* ================= TIMER ================= */
   useEffect(() => {
     if (time <= 0 || success) return;
 
@@ -39,26 +38,26 @@ const OtpVerify = () => {
     return () => clearInterval(interval);
   }, [time, success]);
 
-  /* 🚀 REDIRECT AFTER SUCCESS */
+  /* ================= REDIRECT AFTER SUCCESS ================= */
   useEffect(() => {
     if (!success) return;
 
-    const redirectTimer = setTimeout(() => {
-      if (authType === "signup") {
-        navigate("/login");
-      } else {
-        navigate(
-          role === "STUDENT"
-            ? "/student/dashboard"
-            : "/alumni/dashboard"
-        );
+    const role = localStorage.getItem("role"); // backend-trusted
+
+    if (authType === "signup") {
+      if (role === "STUDENT") {
+        navigate("/student/dashboard");
+      } else if (role === "ALUMNI") {
+        navigate("/alumni/form");
       }
-
-      localStorage.clear();
-    }, 1500);
-
-    return () => clearTimeout(redirectTimer);
-  }, [success, role, authType, navigate]);
+    } else {
+      if (role === "STUDENT") {
+        navigate("/student/dashboard");
+      } else if (role === "ALUMNI") {
+        navigate("/alumni/dashboard");
+      }
+    }
+  }, [success, authType, navigate]);
 
   /* ================= INPUT HANDLERS ================= */
   const handleChange = (e, index) => {
@@ -113,44 +112,50 @@ const OtpVerify = () => {
 
   /* ================= VERIFY OTP ================= */
   const handleVerify = async () => {
-    if (otp.some((d) => d === "") || loading) return;
+  if (otp.some((d) => d === "") || loading) return;
 
-    setLoading(true);
-    try {
-      const payload =
-        authType === "signup"
-          ? {
-              email,
-              otp: otp.join(""),
-              name,
-              role,
-            }
-          : {
-              email,
-              otp: otp.join(""),
-            };
+  setLoading(true);
+  try {
+    const role = localStorage.getItem("role");
 
-      const url =
-        authType === "signup"
-          ? "https://uit-alumni-hub-backend.onrender.com/auth/signup/verify"
-          : "https://uit-alumni-hub-backend.onrender.com/auth/login/verify";
+    const payload =
+      authType === "signup"
+        ? {
+            email,
+            otp: otp.join(""),
+            name,
+            role, // ✅ REQUIRED FOR ALUMNI
+          }
+        : {
+            email,
+            otp: otp.join(""),
+          };
 
-      const res = await axios.post(url, payload);
+    const url =
+      authType === "signup"
+        ? "https://uit-alumni-hub-backend.onrender.com/auth/signup/verify"
+        : "https://uit-alumni-hub-backend.onrender.com/auth/login/verify";
 
-      if (res.data?.token) {
-        localStorage.setItem("token", res.data.token);
-      }
+    const res = await axios.post(url, payload);
 
-      setSuccess(true);
-    } catch (err) {
-      console.error("OTP VERIFY ERROR:", err?.response?.data || err);
-      setError(true);
-      setOtp(Array(OTP_LENGTH).fill(""));
-      inputsRef.current[0]?.focus();
-    } finally {
-      setLoading(false);
+    if (res.data?.token) {
+      localStorage.setItem("token", res.data.token);
     }
-  };
+
+    if (res.data?.role) {
+      localStorage.setItem("role", res.data.role);
+    }
+
+    setSuccess(true);
+  } catch (err) {
+    console.error("OTP VERIFY ERROR:", err?.response?.data || err);
+    setError(true);
+    setOtp(Array(OTP_LENGTH).fill(""));
+    inputsRef.current[0]?.focus();
+  } finally {
+    setLoading(false);
+  }
+};
 
   /* ================= RESEND OTP ================= */
   const handleResend = async () => {

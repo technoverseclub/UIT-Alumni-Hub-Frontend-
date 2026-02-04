@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Login from "../pages/login/Login.jsx";
 import Signup from "../pages/signup/Signup.jsx";
-import Signup2 from "../pages/signup-step2/Signup2.jsx";
 import Otp from "../pages/otp/Otp.jsx";
 
 import AlumniHub from "../pages/alumni-hub/AlumniHub.jsx";
@@ -18,7 +17,6 @@ const AppRouter = () => {
         <Route path="/" element={<AlumniHub />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/signup2" element={<Signup2 />} />
         <Route path="/otp" element={<Otp />} />
         <Route path="/student/dashboard" element={<StudentDashboard />} />
         <Route path="/alumni/dashboard" element={<AlumniDashboard />} />
