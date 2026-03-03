@@ -1,0 +1,114 @@
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import AppLayout from "../layouts/AppLayout";
+
+import RoleProtectedRoute from "./RoleProtectedRoute";
+import PublicRoute from "./PublicRoute";
+import AlumniProfileGuard from "./AlumniProfileGuard";
+import StudentProfileGuard from "./StudentProfileGuard";
+
+import StudentDashboardLayout from "../features/student/pages/studentDashboard/layout/StudentDashboardLayout";
+import StudentProfile from "../features/student/pages/studentDashboard/profile/StudentProfile";
+import StudentMessages from "../features/student/pages/studentDashboard/messages/StudentMessages";
+import StudentSettings from "../features/student/pages/studentDashboard/settings/StudentSettings";
+import AlumniDashboardLayout from "../features/alumni/pages/alumniDashboard/layout/AlumniDashboardLayout";
+import AlumniProfile from "../features/alumni/pages/alumniDashboard/profile/AlumniProfile";
+import AlumniMessages from "../features/alumni/pages/alumniDashboard/messages/AlumniMessages";
+import AlumniSettings from "../features/alumni/pages/alumniDashboard/settings/AlumniSettings";
+import AlumniForm from "../features/alumni/pages/alumniForm/AlumniForm";
+import StudentForm from "../features/student/pages/studentForm/StudentForm";
+
+import Landing from "../pages/Landing";
+import Login from "../features/auth/pages/Login";
+import Signup from "../features/auth/pages/Signup";
+import VerifyOtp from "../features/auth/pages/VerifyOtp";
+
+const Router = () => {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route element={<AppLayout />}>
+
+          {/* Public Routes */}
+          <Route path="/" element={<Landing />} />
+
+          <Route
+            path="/login"
+            element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            }
+          />
+
+          <Route
+            path="/signup"
+            element={
+              <PublicRoute>
+                <Signup />
+              </PublicRoute>
+            }
+          />
+
+          <Route path="/verify" element={<VerifyOtp />} />
+
+          {/* Alumni Form */}
+          <Route
+            path="/alumni/form"
+            element={
+              <RoleProtectedRoute allowedRoles={["ALUMNI"]}>
+                <AlumniForm />
+              </RoleProtectedRoute>
+            }
+          />
+
+
+<Route
+  path="/student/form"
+  element={
+    <RoleProtectedRoute allowedRoles={["STUDENT"]}>
+      <StudentForm />
+    </RoleProtectedRoute>
+  }
+/>
+
+          {/* Student Dashboard */}
+          <Route
+  path="/student/dashboard"
+  element={
+    <RoleProtectedRoute allowedRoles={["STUDENT"]}>
+      <StudentProfileGuard>
+        <StudentDashboardLayout />
+      </StudentProfileGuard>
+    </RoleProtectedRoute>
+  }
+>
+            <Route index element={<Navigate to="profile" replace />} />
+            <Route path="profile" element={<StudentProfile />} />
+            <Route path="messages" element={<StudentMessages />} />
+            <Route path="settings" element={<StudentSettings />} />
+          </Route>
+
+          {/* Alumni Dashboard */}
+          <Route
+            path="/alumni/dashboard"
+            element={
+              <RoleProtectedRoute allowedRoles={["ALUMNI"]}>
+                <AlumniProfileGuard>
+                  <AlumniDashboardLayout />
+                </AlumniProfileGuard>
+              </RoleProtectedRoute>
+            }
+          >
+            <Route index element={<Navigate to="profile" replace />} />
+            <Route path="profile" element={<AlumniProfile />} />
+            <Route path="messages" element={<AlumniMessages />} />
+            <Route path="settings" element={<AlumniSettings />} />
+          </Route>
+
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
+};
+
+export default Router;
