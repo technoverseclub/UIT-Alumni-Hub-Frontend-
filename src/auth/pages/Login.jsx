@@ -3,16 +3,9 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { requestLoginOtp } from "../auth.api";
-import { useEffect } from "react";
-import { useAuthStore } from "../auth.store";
 
 const Login = () => {
   const navigate = useNavigate();
-  const logout = useAuthStore((s) => s.logout);
-
-  useEffect(() => {
-    logout();
-  }, []);
 
   const [email, setEmail] = useState("");
   const [errors, setErrors] = useState({});
