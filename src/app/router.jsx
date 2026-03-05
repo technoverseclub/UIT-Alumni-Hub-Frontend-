@@ -6,21 +6,24 @@ import PublicRoute from "./PublicRoute";
 import AlumniProfileGuard from "./AlumniProfileGuard";
 import StudentProfileGuard from "./StudentProfileGuard";
 
-import StudentDashboardLayout from "../features/student/pages/studentDashboard/layout/StudentDashboardLayout";
-import StudentProfile from "../features/student/pages/studentDashboard/profile/StudentProfile";
-import StudentMessages from "../features/student/pages/studentDashboard/messages/StudentMessages";
-import StudentSettings from "../features/student/pages/studentDashboard/settings/StudentSettings";
-import AlumniDashboardLayout from "../features/alumni/pages/alumniDashboard/layout/AlumniDashboardLayout";
-import AlumniProfile from "../features/alumni/pages/alumniDashboard/profile/AlumniProfile";
-import AlumniMessages from "../features/alumni/pages/alumniDashboard/messages/AlumniMessages";
-import AlumniSettings from "../features/alumni/pages/alumniDashboard/settings/AlumniSettings";
-import AlumniForm from "../features/alumni/pages/alumniForm/AlumniForm";
-import StudentForm from "../features/student/pages/studentForm/StudentForm";
+import StudentDashboardLayout from "../student/pages/studentDashboard/layout/StudentDashboardLayout";
+import StudentProfile from "../student/pages/studentDashboard/profile/StudentProfile";
+import StudentMessages from "../student/pages/studentDashboard/messages/StudentMessages";
+import StudentSettings from "../student/pages/studentDashboard/settings/StudentSettings";
+import AlumniDashboardLayout from "../alumni/pages/alumniDashboard/layout/AlumniDashboardLayout";
+import AlumniProfile from "../alumni/pages/alumniDashboard/profile/AlumniProfile";
+import AlumniMessages from "../alumni/pages/alumniDashboard/messages/AlumniMessages";
+import AlumniSettings from "../alumni/pages/alumniDashboard/settings/AlumniSettings";
+import AlumniForm from "../alumni/pages/alumniForm/AlumniForm";
+import StudentForm from "../student/pages/studentForm/StudentForm";
 
-import Landing from "../pages/Landing";
-import Login from "../features/auth/pages/Login";
-import Signup from "../features/auth/pages/Signup";
-import VerifyOtp from "../features/auth/pages/VerifyOtp";
+import AlumniHub from "../alumni-hub/pages/AlumniHub";
+import AlumniHubProfile from "../alumni-hub/pages/AlumniHubProfile";
+
+import Landing from "../landingPage/Landing";
+import Login from "../auth/pages/Login";
+import Signup from "../auth/pages/Signup";
+import VerifyOtp from "../auth/pages/VerifyOtp";
 
 const Router = () => {
   return (
@@ -50,6 +53,10 @@ const Router = () => {
           />
 
           <Route path="/verify" element={<VerifyOtp />} />
+
+          {/* Alumni Hub — public */}
+          <Route path="/alumni-hub" element={<AlumniHub />} />
+          <Route path="/alumni-hub/:userId" element={<AlumniHubProfile />} />
 
           {/* Alumni Form */}
           <Route

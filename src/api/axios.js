@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useAuthStore } from "../features/auth/auth.store";
+import { useAuthStore } from "../auth/auth.store";
 
 let hasHandledUnauthorized = false;
 
@@ -12,8 +12,6 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = useAuthStore.getState().accessToken;
-    console.log("🔵 Axios token:", token); // 👈 add this
-    console.log("🔵 Request URL:", config.url); // 👈 and this
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

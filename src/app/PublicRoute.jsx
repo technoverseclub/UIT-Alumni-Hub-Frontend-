@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import { useAuthStore } from "../features/auth/auth.store";
+import { useAuthStore } from "../auth/auth.store";
 
 const PublicRoute = ({ children }) => {
   const { accessToken, hasHydrated } = useAuthStore();

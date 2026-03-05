@@ -1,1 +1,6 @@
 @import "tailwindcss";
+
+.alumni-hub-scroll::-webkit-scrollbar { width: 6px; }
+.alumni-hub-scroll::-webkit-scrollbar-track { background: transparent; }
+.alumni-hub-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 999px; }
+.alumni-hub-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
