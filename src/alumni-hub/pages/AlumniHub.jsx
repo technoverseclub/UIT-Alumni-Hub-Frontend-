@@ -88,7 +88,7 @@ return (
 
         {!loading && !error &&
           filtered.map((item, index) => (
-            <AlumniCard key={item._id} alumni={item} index={index} />
+            <AlumniCard key={item.id} alumni={item} index={index} />
           ))}
 
       </div>
