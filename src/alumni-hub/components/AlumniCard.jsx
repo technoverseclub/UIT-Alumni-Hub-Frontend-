@@ -42,3 +42,6 @@ const AlumniCard = ({ alumni, index }) => {
 };
 
 export default AlumniCard;
+
+
+// The AlumniCard component displays an individual alumni's information in a card format. It shows the alumni's profile picture (or a generated avatar if no picture is available), their name, position, and company. There's also a "View Profile" button that navigates to the detailed profile page for that alumni when clicked. The card layout adjusts based on its position in the grid to maintain a clean design.
