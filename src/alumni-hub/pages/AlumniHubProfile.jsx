@@ -16,21 +16,23 @@ const AlumniHubProfile = () => {
       try {
         const res = await getAlumniById(userId);
         if (mounted) setProfile(res.data);
-      } catch {
-        console.error("Failed to load profile");
-      } finally {
+      } catch (err) {
+  console.error("Failed to load profile", err);
+} finally {
         if (mounted) setLoading(false);
       }
     };
 
     load();
-    return () => { mounted = false };
+    return () => {
+  mounted = false;
+};
   }, [userId]);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        Loading...
+        <p>Loading...</p>
       </div>
     );
   }
@@ -39,7 +41,7 @@ const AlumniHubProfile = () => {
     <div className="w-full max-w-7xl flex gap-10 px-10 mx-auto">
 
       {/* Sidebar */}
-      <aside className="w-65 bg-white/95 backdrop-blur-md rounded-2xl p-6 shadow-2xl flex flex-col">
+      <aside className="w-64 bg-white/95 backdrop-blur-md rounded-2xl p-6 shadow-2xl flex flex-col">
 
         <h2 className="text-xl font-bold text-blue-900 mb-10">
           Alumni
@@ -84,15 +86,19 @@ const AlumniHubProfile = () => {
           {/* Image */}
           <div className="flex flex-col items-center mt-10">
             <img
-              src={
-                profile?.imageUrl ||
-                `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                  profile?.user?.name || "Alumni"
-                )}&background=1e3a5f&color=fff&size=128`
-              }
-              alt="Profile"
-              className="w-32 h-32 rounded-full object-cover mb-4 border shadow"
-            />
+  src={
+    profile?.imageUrl ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      profile?.user?.name || "Alumni"
+    )}&background=1e3a5f&color=fff&size=128`
+  }
+  alt="Profile"
+  className="w-32 h-32 rounded-full object-cover mb-4 border shadow"
+  onError={(e) => {
+    e.target.onerror = null;
+    e.target.src = `https://ui-avatars.com/api/?name=Alumni&background=1e3a5f&color=fff&size=128`;
+  }}
+/>
           </div>
 
           {/* Details */}

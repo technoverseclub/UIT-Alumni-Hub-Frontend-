@@ -23,9 +23,9 @@ const AlumniHub = () => {
       try {
         const res = await getAllAlumni();
         if (mounted) setAlumni(res.data);
-      } catch{
-        if (mounted) setError("Failed to load alumni.");
-      } finally {
+      } catch (err) {
+  if (mounted) setError("Failed to load alumni.");
+} finally {
         if (mounted) setLoading(false);
       }
     };
@@ -35,8 +35,7 @@ const AlumniHub = () => {
   }, []);
 
   const filtered = alumni.filter((a) => {
-    const matchSearch = a.user?.name?.toLowerCase().includes(search.toLowerCase());
-    const matchBatch = batch === "All" || String(a.batch) === String(batch);
+const matchSearch = a.user?.name?.toLowerCase()?.includes(search.toLowerCase());    const matchBatch = batch === "All" || String(a.batch) === String(batch);
     const matchBranch = branch === "All" || a.branch === branch;
     return matchSearch && matchBatch && matchBranch;
   });
@@ -88,8 +87,7 @@ return (
 
         {!loading && !error &&
           filtered.map((item, index) => (
-            <AlumniCard key={item.id} alumni={item} index={index} />
-          ))}
+<AlumniCard key={item.id || index} alumni={item} index={index} />          ))}
 
       </div>
 
