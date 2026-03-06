@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import LoginButton from "../LandingPage/LoginButton";
+import LoginButton from "../landingPage/LoginButton";
 import Bg from "../components/Bg";
 import Logo from "../components/Logo";
 import { Outlet } from "react-router-dom";
