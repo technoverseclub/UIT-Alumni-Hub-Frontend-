@@ -23,7 +23,7 @@ const AlumniHub = () => {
       try {
         const res = await getAllAlumni();
         if (mounted) setAlumni(res.data);
-      } catch (err) {
+      } catch {
   if (mounted) setError("Failed to load alumni.");
 } finally {
         if (mounted) setLoading(false);
