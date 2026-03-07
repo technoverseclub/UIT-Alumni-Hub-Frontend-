@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { getAlumniProfile } from "../../../alumni.api";
 import { useAuthStore } from "../../../../auth/auth.store";
+import FormInput from "../../../../components/FormInput"; // adjust path
 
 const AlumniProfile = () => {
   const accessToken = useAuthStore((s) => s.accessToken);
@@ -8,6 +9,7 @@ const AlumniProfile = () => {
 
   const hasFetched = useRef(false);
   const [profile, setProfile] = useState(null);
+  const loadingRef = useRef(true);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -79,16 +81,3 @@ const AlumniProfile = () => {
 };
 
 export default AlumniProfile;
-
-const FormInput = ({ label, value }) => (
-  <div className="flex flex-col">
-    <label className="text-sm font-semibold text-blue-700 mb-1">
-      {label}
-    </label>
-    <input
-      value={value || ""}
-      readOnly
-      className="border rounded-lg px-3 py-2 bg-gray-50 focus:outline-none"
-    />
-  </div>
-);

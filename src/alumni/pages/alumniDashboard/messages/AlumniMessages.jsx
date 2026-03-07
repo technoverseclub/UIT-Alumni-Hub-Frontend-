@@ -1,10 +1,13 @@
-import React from "react";
+import ChatLayout from "../../../../chat";
+import { useSearchParams } from "react-router-dom";
 
 const AlumniMessages = () => {
+  const [searchParams] = useSearchParams();
+  const initialTargetUserId = searchParams.get("targetUserId");
+
   return (
-    <div>
-      <h2>Messages</h2>
-      <p>Alumni Messages page</p>
+    <div className="h-[calc(100vh-12rem)] min-h-100">
+      <ChatLayout initialTargetUserId={initialTargetUserId} />
     </div>
   );
 };
